@@ -1,6 +1,4 @@
 name: Terraform
-description: Terraform plan & apply
-author: Ike Murami (murami.ike@gmail.com)
 
 on:
   workflow_call:
