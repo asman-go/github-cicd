@@ -1,0 +1,61 @@
+name: Terraform
+description: Terraform plan & apply
+author: Ike Murami (murami.ike@gmail.com)
+
+on:
+  workflow_call:
+    inputs:
+
+      terraform_folder:
+        type: string
+        required: false
+        description: Path to a Terraform configs folder
+        default: deploy
+
+jobs:
+  terraform:
+    name: Terraform plan & apply
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: Terraform Init
+      run: terraform -chdir=${{ inputs.terraform_folder }} init
+
+    - name: Terraform Check Format
+      run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
+
+    - name: 'PROD: Terraform Plan'
+      if: github.ref == 'refs/heads/main'
+      run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
+      env:
+        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_PRODUCTION }}
+
+    - name: 'TEST: Terraform Plan'
+      if: github.ref != 'refs/heads/main'
+      run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
+      env:
+        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_TESTING }}
+
+    - name: 'PROD: Terraform Apply'
+      # If PR to main branch
+      if: github.ref == 'refs/heads/$default-branch' && github.event_name == 'push'
+      run: terraform -chdir=${{ inputs.terraform_folder }} apply -auto-approve -input=false
+      env:
+        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_PRODUCTION }}
+
+    - name: 'DEV: Terraform Apply'
+      # If PR to dev branch
+      if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+      run: terraform -chdir=${{ inputs.terraform_folder }} apply -auto-approve -input=false
+      env:
+        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_TESTING }}
