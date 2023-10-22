@@ -48,7 +48,7 @@ jobs:
     # 4. generate python code and deploy function if it is a merge request
     - name: Generate python schema
       if: github.event_name == 'push'
-      run: protoc -I ./proto --python_out=./src --grpc_python_out=./src ./proto/*.proto
+      run: protoc -I ./proto --python_out=./src ./proto/*.proto
 
     - name: Terraform Apply
       if: github.event_name == 'push'
@@ -93,7 +93,7 @@ jobs:
     # 4. generate python code and deploy function if it is a merge request
     - name: Generate python schema
       if: github.event_name == 'push'
-      run: protoc -I ./proto --python_out=./src --grpc_python_out=./src ./proto/*.proto
+      run: protoc -I ./proto --python_out=./src ./proto/*.proto
 
     - name: Terraform Apply
       if: github.event_name == 'push'
