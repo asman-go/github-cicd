@@ -11,8 +11,99 @@ on:
         default: deploy
 
 jobs:
-  terraform:
+  terraform-prod:
     name: Terraform plan & apply
+    if: github.ref == 'refs/heads/$default-branch'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+    
+    steps:
+    # 1. Checkout
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    # 2. Install dependencies
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: Setup Protoc
+      if: github.event_name == 'push'
+      uses: arduino/setup-protoc@v2
+
+    # 3. Terraform Plan
+    - name: Terraform Init
+      run: terraform -chdir=${{ inputs.terraform_folder }} init
+
+    - name: Terraform Check Format
+      run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
+
+    - name: Terraform Plan
+      run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
+      env:
+        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_PRODUCTION }}
+    
+    # 4. generate python code and deploy function if it is a merge request
+    - name: Generate python schema
+      if: github.event_name == 'push'
+      run: protoc -I ./proto --python_out=./src --grpc_python-out=./src ./proto/*.proto
+
+    - name: Terraform Apply
+      if: github.event_name == 'push'
+      run: terraform -chdir=${{ inputs.terraform_folder }} apply -auto-approve -input=false
+      env:
+        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_PRODUCTION }}
+
+  terraform-dev:
+    name: Terraform plan & apply
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+    
+    steps:
+    # 1. Checkout
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    # 2. Install dependencies
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: Setup Protoc
+      if: github.event_name == 'push'
+      uses: arduino/setup-protoc@v2
+
+    # 3. Terraform Plan
+    - name: Terraform Init
+      run: terraform -chdir=${{ inputs.terraform_folder }} init
+
+    - name: Terraform Check Format
+      run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
+
+    - name: Terraform Plan
+      run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
+      env:
+        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_TESTING }}
+    
+    # 4. generate python code and deploy function if it is a merge request
+    - name: Generate python schema
+      if: github.event_name == 'push'
+      run: protoc -I ./proto --python_out=./src --grpc_python-out=./src ./proto/*.proto
+
+    - name: Terraform Apply
+      if: github.event_name == 'push'
+      run: terraform -chdir=${{ inputs.terraform_folder }} apply -auto-approve -input=false
+      env:
+        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_TESTING }}
+
+  terraform-test:
+    name: Terraform plan
+    if: github.ref != 'refs/heads/$default-branch' && github.ref != 'refs/heads/dev'
     runs-on: ubuntu-latest
 
     defaults:
@@ -32,28 +123,7 @@ jobs:
     - name: Terraform Check Format
       run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
 
-    - name: 'PROD: Terraform Plan'
-      if: github.ref == 'refs/heads/main'
+    - name: 'Terraform Plan'
       run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
-      env:
-        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_PRODUCTION }}
-
-    - name: 'TEST: Terraform Plan'
-      if: github.ref != 'refs/heads/main'
-      run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
-      env:
-        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_TESTING }}
-
-    - name: 'PROD: Terraform Apply'
-      # If PR to main branch
-      if: github.ref == 'refs/heads/$default-branch' && github.event_name == 'push'
-      run: terraform -chdir=${{ inputs.terraform_folder }} apply -auto-approve -input=false
-      env:
-        YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_PRODUCTION }}
-
-    - name: 'DEV: Terraform Apply'
-      # If PR to dev branch
-      if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-      run: terraform -chdir=${{ inputs.terraform_folder }} apply -auto-approve -input=false
       env:
         YC_TOKEN: ${{ secrets.YCLOUD_ACCESS_TOKEN_TESTING }}
