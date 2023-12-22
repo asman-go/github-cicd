@@ -25,3 +25,4 @@ jobs:
       secret_key: ${{ inputs.TEST_SECRET_KEY }}
       secret_value: ${{ inputs.TEST_SECRET_VALUE }}
       github_token: ${{ env.GITHUB_TOKEN }}
+    secrets: inherit
