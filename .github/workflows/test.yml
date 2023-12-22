@@ -1,0 +1,24 @@
+name: wf test
+
+on:
+  workflow_dispatch:
+    inputs:
+      secret_key:
+        default: TEST_SECRET_KEY
+        description: Name of a secret
+        type: string
+        required: true
+      secret_value:
+        default: TEST_SECRET_VALUE
+        description: Value of a secret
+        type: string
+        required: true
+
+jobs:
+  update-secret:
+    name: test
+    uses: asman-go/github-cicd/.github/workflows/update_repo_secret_test.yml@main
+    with:
+      secret_key: ${{ inputs.TEST_SECRET_KEY }}
+      secret_value: ${{ inputs.TEST_SECRET_VALUE }}
+      github_token: ${{ secrets.PAC_GITHUB_TOKEN }}
