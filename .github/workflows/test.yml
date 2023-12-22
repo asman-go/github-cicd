@@ -14,9 +14,6 @@ on:
         type: string
         required: true
 
-env:
-  GITHUB_TOKEN: ${{ secrets.PAC_GITHUB_TOKEN }}
-
 jobs:
   update-secret:
     name: test
@@ -24,5 +21,4 @@ jobs:
     with:
       secret_key: ${{ inputs.TEST_SECRET_KEY }}
       secret_value: ${{ inputs.TEST_SECRET_VALUE }}
-      github_token: ${{ env.GITHUB_TOKEN }}
     secrets: inherit
