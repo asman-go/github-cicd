@@ -13,6 +13,14 @@ on:
         description: Value of a secret
         type: string
         required: true
+      level:
+        default: organization
+        description: На какой уровень выставить секрет
+        type: choice
+        required: true
+        options:
+          - organization
+          - repository
 
 jobs:
   update-secret:
@@ -21,4 +29,5 @@ jobs:
     with:
       secret_key: ${{ inputs.secret_key }}
       secret_value: ${{ inputs.secret_value }}
+      level: ${{ inputs.level }}
     secrets: inherit
