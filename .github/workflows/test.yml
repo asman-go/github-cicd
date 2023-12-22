@@ -19,6 +19,6 @@ jobs:
     name: test
     uses: asman-go/github-cicd/.github/workflows/update_repo_secret_test.yml@main
     with:
-      secret_key: ${{ inputs.TEST_SECRET_KEY }}
-      secret_value: ${{ inputs.TEST_SECRET_VALUE }}
+      secret_key: ${{ inputs.secret_key }}
+      secret_value: ${{ inputs.secret_value }}
     secrets: inherit
