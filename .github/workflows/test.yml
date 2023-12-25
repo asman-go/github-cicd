@@ -14,7 +14,7 @@ on:
         type: string
         required: true
       level:
-        default: organization
+        default: repository
         description: На какой уровень выставить секрет
         type: choice
         required: true
