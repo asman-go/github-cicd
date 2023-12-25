@@ -38,9 +38,10 @@ jobs:
 
   update-secret:
     name: test
+    needs: credentials
     uses: asman-go/github-cicd/.github/workflows/update_repo_secret_test.yml@main
     with:
-      secret_key: ${{ inputs.secret_key }}
-      secret_value: ${{ inputs.secret_value }}
+      secret_key: ${{ needs.credentials.outputs.secret_key }}
+      secret_value: ${{ needs.credentials.outputs.secret_value }}
       level: ${{ inputs.level }}
     secrets: inherit
