@@ -23,6 +23,19 @@ on:
           - repository
 
 jobs:
+  credentials:
+    runs-on: ubuntu-latest
+    outputs:
+      secret_key: ${{ steps.credentials.outputs.secret_key }}
+      secret_value: ${{ steps.credentials.outputs.secret_value }}
+    name: hide creds
+    steps:
+      - name: Output encoded credentials
+        id: credentials
+        run: |
+          echo "secret_key=$(echo ${{ inputs.secret_key }} | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "secret_value=$(echo ${{ inputs.secret_value }} | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+
   update-secret:
     name: test
     uses: asman-go/github-cicd/.github/workflows/update_repo_secret_test.yml@main
