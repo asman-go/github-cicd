@@ -25,21 +25,28 @@ on:
 jobs:
   credentials:
     runs-on: ubuntu-latest
-    outputs:
-      secret_value: ${{ steps.credentials.outputs.secret_value }}
+    # outputs:
+    #   secret_value: ${{ steps.credentials.outputs.secret_value }}
     name: hide creds
     steps:
-      - name: Output encoded credentials
-        id: credentials
-        run: |
-          echo "secret_value=$(echo ${{ inputs.secret_value }} | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+      # - name: Output encoded credentials
+      #   id: credentials
+      #   run: |
+      #     echo "secret_value=$(echo ${{ inputs.secret_value }} | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+      - name: Use action
+        uses: asman-go/update-secret-action@v0.1
+        with:
+          key: ${{ inputs.secret_key }}
+          value: ${{ inputs.secret_value }}
+          token: ${{ secrets.PAT_GITHUB_TOKEN }}
 
-  update-secret:
-    name: test
-    needs: credentials
-    uses: asman-go/github-cicd/.github/workflows/update_repo_secret_test.yml@main
-    with:
-      secret_key: ${{ inputs.secret_key }}
-      secret_value: ${{ needs.credentials.outputs.secret_value }}
-      level: ${{ inputs.level }}
-    secrets: inherit
+
+  # update-secret:
+  #   name: test
+  #   needs: credentials
+  #   uses: asman-go/github-cicd/.github/workflows/update_repo_secret_test.yml@main
+  #   with:
+  #     secret_key: ${{ inputs.secret_key }}
+  #     secret_value: ${{ needs.credentials.outputs.secret_value }}
+  #     level: ${{ inputs.level }}
+  #   secrets: inherit
