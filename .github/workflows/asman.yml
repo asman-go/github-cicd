@@ -1,0 +1,60 @@
+name: 'Asman: deploy the project in YCloud'
+
+on:
+  workflow_dispatch:
+    inputs:
+
+      terraform_module:
+        type: string
+        required: true
+        description: Path to a Terraform module (a Github-repository or a module from Terraform registry)
+
+env:
+  # YCloud main secret
+  YC_TOKEN: ${{ secrets.YC_TOKEN }}
+
+  # Terraform default variables
+  TF_VAR_cloud: ikemurami-cloud
+  TF_VAR_folder: ${{ vars.BUCKET_NAME }}
+  TF_VAR_module: ${{ inputs.terraform_module }}
+
+  # terraform remote backend config
+  AWS_REGION: ru-central1
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  AWS_ENDPOINT_URL_DYNAMODB: ${{ secrets.DYNAMODB_API_ENDPOINT }}
+  AWS_ENDPOINT_URL_S3: storage.yandexcloud.net
+
+jobs:
+  terraform-prod:
+    name: Terraform plan & apply
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+    
+    steps:
+    # 1. Checkout the `terraform-base`-wrapper
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        repository: asman-go/terraform-base
+
+    # 2. Install dependencies
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    # 3. Terraform plan
+    - name: Terraform Init
+      run: terraform -chdir=${{ inputs.terraform_folder }} init
+
+    - name: Terraform Check Format
+      run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
+
+    - name: Terraform Plan
+      run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
+
+    - name: Terraform Apply
+      # if: github.event_name == 'push'
+      run: terraform -chdir=${{ inputs.terraform_folder }} apply -auto-approve -input=false
