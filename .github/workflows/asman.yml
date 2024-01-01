@@ -13,6 +13,7 @@ on:
         type: string
         required: true
         description: Path to a Terraform module (a Github-repository or a module from Terraform registry)
+        default: github.com/asman-go/cf-bbprogram//deploy
 
 env:
   # YCloud main secret
@@ -20,7 +21,7 @@ env:
 
   # Terraform default variables
   TF_VAR_cloud: ikemurami-cloud
-  TF_VAR_folder: ${{ vars.BUCKET_NAME }}
+  TF_VAR_folder: ${{ vars.FOLDER_NAME }}
   TF_VAR_module: ${{ inputs.terraform_module }}
 
   # terraform remote backend config
@@ -50,6 +51,10 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
 
+    - name: Setup Protoc
+      # if: github.event_name == 'push'
+      uses: arduino/setup-protoc@v2
+
     # 3. Terraform plan
     - name: Terraform Init
       run: terraform -chdir=${{ inputs.terraform_folder }} init
@@ -60,6 +65,15 @@ jobs:
     - name: Terraform Plan
       run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
 
+    # 4. generate python code and deploy function if it is a merge request
+    - name: Generate python schema
+      if: github.event_name == 'push'
+      run: |
+        terraform_module_name="terraform-module"
+        cd .terraform/modules/$terraform_module_name
+        protoc -I ./proto --python_out=./src ./proto/*.proto
+
+    # 5. Apply
     - name: Terraform Apply
       # if: github.event_name == 'push'
       run: terraform -chdir=${{ inputs.terraform_folder }} apply -auto-approve -input=false
