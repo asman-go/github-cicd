@@ -63,7 +63,7 @@ jobs:
     - name: Terraform Init
       env:
         AWS_ENDPOINT_URL_DYNAMODB: ${{ secrets.DYNAMODB_API_ENDPOINT }}
-        AWS_ENDPOINT_URL_S3: storage.yandexcloud.net
+        AWS_ENDPOINT_URL_S3: https://storage.yandexcloud.net
       run: terraform -chdir=${{ inputs.terraform_folder }} init -backend-config=secret.backend.tfvars -reconfigure
 
     - name: Terraform Check Format
