@@ -85,6 +85,7 @@ jobs:
       # if: github.event_name == 'push'
       run: |
         echo "$PWD"
+        ls -al
         terraform_module_name="terraform-module"
         cd .terraform/modules/$terraform_module_name
         protoc -I ./proto --python_out=./src ./proto/*.proto
