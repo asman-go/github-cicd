@@ -66,8 +66,14 @@ jobs:
     - name: Terraform Init
       run: terraform -chdir=${{ inputs.terraform_folder }} init -backend-config=secret.backend.tfvars -reconfigure
 
+    - name: Terraform Get our modules (if we use it)
+      run: terraform -chdir=${{ inputs.terraform_folder }} get -update=true
+
     # - name: Terraform Check Format
     #   run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
+
+    # - name: Terraform Validate the configuration
+    #   run: terraform -chdir=${{ inputs.terraform_folder }} validate
 
     - name: Terraform Plan
       run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
