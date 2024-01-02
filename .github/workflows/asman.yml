@@ -58,7 +58,8 @@ jobs:
         bucket = "${{ vars.BUCKET_NAME }}"
         access_key = "${{ secrets.AWS_ACCESS_KEY }}"
         secret_key = "${{ secrets.AWS_SECRET_KEY }}"
-        dynamodb_endpoint = "${{ secrets.DYNAMODB_API_ENDPOINT }}"
+        endpoints.dynamodb = "${{ secrets.DYNAMODB_API_ENDPOINT }}"
+        endpoints.s3 = "storage.yandexcloud.net"
         EOF
 
     - name: Terraform Init
