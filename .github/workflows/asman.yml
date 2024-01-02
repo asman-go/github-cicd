@@ -64,7 +64,9 @@ jobs:
         EOF
 
     - name: Terraform Init
-      run: terraform -chdir=${{ inputs.terraform_folder }} init -backend-config=secret.backend.tfvars -reconfigure
+      run: |
+        echo "$PWD"
+        terraform -chdir=${{ inputs.terraform_folder }} init -backend-config=secret.backend.tfvars -reconfigure
 
     - name: Terraform Get our modules (if we use it)
       run: terraform -chdir=${{ inputs.terraform_folder }} get -update=true
@@ -82,6 +84,7 @@ jobs:
     - name: Generate python schema
       # if: github.event_name == 'push'
       run: |
+        echo "$PWD"
         terraform_module_name="terraform-module"
         cd .terraform/modules/$terraform_module_name
         protoc -I ./proto --python_out=./src ./proto/*.proto
