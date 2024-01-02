@@ -67,12 +67,7 @@ jobs:
       run: terraform -chdir=${{ inputs.terraform_folder }} init -backend-config=secret.backend.tfvars -reconfigure
 
     - name: Terraform Get our modules (if we use it)
-      run: |
-        echo "$PWD"
-        terraform -chdir=${{ inputs.terraform_folder }} get -update=true
-        ls -al
-        ls -al ~
-        find / -type d -name 'terraform-module'
+      run: terraform -chdir=${{ inputs.terraform_folder }} get -update=true
 
     # - name: Terraform Check Format
     #   run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
@@ -87,10 +82,8 @@ jobs:
     - name: Generate python schema
       # if: github.event_name == 'push'
       run: |
-        echo "$PWD"
-        ls -al
         terraform_module_name="terraform-module"
-        cd .terraform/modules/$terraform_module_name
+        cd ${{ inputs.terraform_folder }}/.terraform/modules/$terraform_module_name
         protoc -I ./proto --python_out=./src ./proto/*.proto
 
     # 5. Apply
