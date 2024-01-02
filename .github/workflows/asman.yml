@@ -20,16 +20,12 @@ env:
   YC_TOKEN: ${{ secrets.YC_TOKEN }}
 
   # Terraform default variables
-  TF_VAR_cloud: ikemurami-cloud
+  TF_VAR_cloud: ${{ vars.CLOUD_NAME }}
   TF_VAR_folder: ${{ vars.FOLDER_NAME }}
   TF_VAR_module: ${{ inputs.terraform_module }}
 
   # terraform remote backend config
   AWS_REGION: ru-central1
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-  AWS_ENDPOINT_URL_DYNAMODB: ${{ secrets.DYNAMODB_API_ENDPOINT }}
-  AWS_ENDPOINT_URL_S3: storage.yandexcloud.net
 
 jobs:
   terraform-prod:
@@ -56,8 +52,17 @@ jobs:
       uses: arduino/setup-protoc@v2
 
     # 3. Terraform plan
+    - name: Create Terraform remote backend config
+      run: |
+        cat <<EOF > ${{ inputs.terraform_folder }}/secret.backend.tfvars
+        bucket = "${{ vars.BUCKET_NAME }}"
+        access_key = "${{ secrets.AWS_ACCESS_KEY }}"
+        secret_key = "${{ secrets.AWS_SECRET_KEY }}"
+        dynamodb_endpoint = "${{ secrets.DYNAMODB_API_ENDPOINT }}"
+        EOF
+
     - name: Terraform Init
-      run: terraform -chdir=${{ inputs.terraform_folder }} init
+      run: terraform -chdir=${{ inputs.terraform_folder }} init -backend-config=secret.backend.tfvars -reconfigure
 
     - name: Terraform Check Format
       run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
@@ -67,7 +72,7 @@ jobs:
 
     # 4. generate python code and deploy function if it is a merge request
     - name: Generate python schema
-      if: github.event_name == 'push'
+      # if: github.event_name == 'push'
       run: |
         terraform_module_name="terraform-module"
         cd .terraform/modules/$terraform_module_name
