@@ -69,9 +69,9 @@ jobs:
     - name: Terraform Get our modules (if we use it)
       run: |
         echo "$PWD"
+        terraform -chdir=${{ inputs.terraform_folder }} get -update=true
         ls -al
         ls -al ~
-        terraform -chdir=${{ inputs.terraform_folder }} get -update=true
 
     # - name: Terraform Check Format
     #   run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
