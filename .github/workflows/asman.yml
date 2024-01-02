@@ -53,13 +53,14 @@ jobs:
 
     # 3. Terraform plan
     - name: Create Terraform remote backend config
+      env:
+        AWS_ENDPOINT_URL_DYNAMODB: ${{ secrets.DYNAMODB_API_ENDPOINT }}
+        AWS_ENDPOINT_URL_S3: storage.yandexcloud.net
       run: |
         cat <<EOF > ${{ inputs.terraform_folder }}/secret.backend.tfvars
         bucket = "${{ vars.BUCKET_NAME }}"
         access_key = "${{ secrets.AWS_ACCESS_KEY }}"
         secret_key = "${{ secrets.AWS_SECRET_KEY }}"
-        endpoints.dynamodb = "${{ secrets.DYNAMODB_API_ENDPOINT }}"
-        endpoints.s3 = "storage.yandexcloud.net"
         EOF
 
     - name: Terraform Init
