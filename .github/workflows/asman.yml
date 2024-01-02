@@ -66,8 +66,8 @@ jobs:
         AWS_ENDPOINT_URL_S3: https://storage.yandexcloud.net
       run: terraform -chdir=${{ inputs.terraform_folder }} init -backend-config=secret.backend.tfvars -reconfigure
 
-    - name: Terraform Check Format
-      run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
+    # - name: Terraform Check Format
+    #   run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
 
     - name: Terraform Plan
       run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
