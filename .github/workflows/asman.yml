@@ -58,9 +58,9 @@ jobs:
     - name: Create Terraform remote backend config
       run: |
         cat <<EOF > ${{ inputs.terraform_folder }}/secret.backend.tfvars
-        bucket = "${{ vars.BUCKET_NAME }}"
-        access_key = "${{ secrets.AWS_ACCESS_KEY }}"
-        secret_key = "${{ secrets.AWS_SECRET_KEY }}"
+        bucket      = "${{ vars.BUCKET_NAME }}"
+        access_key  = "${{ secrets.AWS_ACCESS_KEY }}"
+        secret_key  = "${{ secrets.AWS_SECRET_KEY }}"
         EOF
 
     - name: Terraform Init
@@ -69,11 +69,11 @@ jobs:
     - name: Terraform Get our modules (if we use it)
       run: terraform -chdir=${{ inputs.terraform_folder }} get -update=true
 
-    # - name: Terraform Check Format
-    #   run: terraform -chdir=${{ inputs.terraform_folder }} fmt -check
+    - name: Terraform Check Format
+      run: terraform -chdir=${{ inputs.terraform_folder }} fmt
 
-    # - name: Terraform Validate the configuration
-    #   run: terraform -chdir=${{ inputs.terraform_folder }} validate
+    - name: Terraform Validate the configuration
+      run: terraform -chdir=${{ inputs.terraform_folder }} validate
 
     - name: Terraform Plan
       run: terraform -chdir=${{ inputs.terraform_folder }} plan -input=false
